@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+
+    
+    nginx:
+        image: nginx:latest
+        container_name: nginx
+        ports:
+            - '80:80'
+        volumes:
+            - ./nginx:/etc/nginx/conf.d
+            - ./logs/nginx:/var/log/nginx
+            - ./wordpress:/var/www/html
+        links:
+            - wordpress
+        restart: always
+
+
+    mysql:
+        image: mariadb
+        container_name: mariadb
+        ports:
+            - '3306:3306'
+        volumes:
+            - ./db-data:/var/lib/mysql
+        environment:
+            - MYSQL_ROOT_PASSWORD=rootpass321
+        restart: always
+    
+    redis:
+        image: redis:alpine
+        container_name: redis
+        ports:
+            - '6379:6379'
+        volumes:
+            - ./redis-data:/var/lib/redis
+        restart: always
+
+
+    wordpress:
+        image: wordpress:4.7.1-php7.0-fpm
+        container_name: wordpress
+        ports:
+            - '9000:9000'
+        volumes:
+            - ./wordpress:/var/www/html
+        environment:
+            - WORDPRESS_DB_NAME=wpdb
+            - WORDPRESS_TABLE_PREFIX=wp_
+            - WORDPRESS_DB_HOST=mysql
+            - WORDPRESS_DB_PASSWORD=rootpass321
+        links:
+            - mysql
+            - redis
+        restart: always
